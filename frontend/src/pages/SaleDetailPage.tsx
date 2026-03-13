@@ -19,13 +19,23 @@ export default function SaleDetailPage() {
   const [sale, setSale] = useState<Sale | null>(null);
   const [items, setItems] = useState<Item[]>([]);
   const [error, setError] = useState('');
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
 
   const id = Number(saleId);
 
   useEffect(() => {
     api.sales.get(id).then(setSale).catch((e) => setError(e.message));
-    api.items.list(id).then(setItems).catch((e) => setError(e.message));
   }, [id]);
+
+  useEffect(() => {
+    api.items.list(id, undefined, undefined, page).then((res) => {
+      setItems(res.content);
+      setTotalPages(res.totalPages);
+      setTotalElements(res.totalElements);
+    }).catch((e) => setError(e.message));
+  }, [id, page]);
 
   const handleDeleteSale = async () => {
     if (!confirm('Delete this sale and all its items?')) return;
@@ -41,7 +51,10 @@ export default function SaleDetailPage() {
     if (!confirm('Delete this item?')) return;
     try {
       await api.items.delete(id, itemId);
-      setItems(items.filter((i) => i.id !== itemId));
+      const res = await api.items.list(id, undefined, undefined, page);
+      setItems(res.content);
+      setTotalPages(res.totalPages);
+      setTotalElements(res.totalElements);
     } catch (e: any) {
       setError(e.message);
     }
@@ -76,7 +89,7 @@ export default function SaleDetailPage() {
           </div>
 
           <div className="page-header" style={{ marginTop: '32px' }}>
-            <h2>Items ({items.length})</h2>
+            <h2>Items ({totalElements})</h2>
             <Link to={`/sales/${id}/items/new`} className="btn btn-primary">+ Add Item</Link>
           </div>
 
@@ -125,6 +138,26 @@ export default function SaleDetailPage() {
               </div>
             ))}
           </div>
+
+          {totalPages > 1 && (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px', marginTop: '16px' }}>
+              <button
+                className="btn btn-secondary"
+                disabled={page === 0}
+                onClick={() => setPage(page - 1)}
+              >
+                Previous
+              </button>
+              <span>Page {page + 1} of {totalPages}</span>
+              <button
+                className="btn btn-secondary"
+                disabled={page >= totalPages - 1}
+                onClick={() => setPage(page + 1)}
+              >
+                Next
+              </button>
+            </div>
+          )}
         </>
       )}
     </div>

@@ -42,6 +42,14 @@ export interface Item {
   updatedAt: string;
 }
 
+export interface PaginatedResponse<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  page: number;
+  size: number;
+}
+
 export interface ItemCreate {
   name: string;
   description?: string;

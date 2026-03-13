@@ -4,6 +4,7 @@ import com.estatesale.inventory.model.Item;
 import com.estatesale.inventory.model.ItemStatus;
 import com.estatesale.inventory.service.ItemService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -21,13 +22,20 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<Map<String, Object>> listItems(
+    public Map<String, Object> listItems(
             @PathVariable Long saleId,
             @RequestParam(required = false) ItemStatus status,
-            @RequestParam(required = false) String category) {
-        return itemService.listItems(saleId, status, category).stream()
-                .map(this::toResponse)
-                .toList();
+            @RequestParam(required = false) String category,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        Page<Item> result = itemService.listItems(saleId, status, category, page, size);
+        Map<String, Object> response = new HashMap<>();
+        response.put("content", result.getContent().stream().map(this::toResponse).toList());
+        response.put("totalElements", result.getTotalElements());
+        response.put("totalPages", result.getTotalPages());
+        response.put("page", result.getNumber());
+        response.put("size", result.getSize());
+        return response;
     }
 
     @GetMapping("/{itemId}")

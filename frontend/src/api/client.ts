@@ -1,4 +1,4 @@
-import type { Sale, SaleCreate, Item, ItemCreate, SaleStatus, ItemStatus } from './types';
+import type { Sale, SaleCreate, Item, ItemCreate, SaleStatus, ItemStatus, PaginatedResponse } from './types';
 
 const BASE = 'http://localhost:8080/api';
 
@@ -29,12 +29,13 @@ export const api = {
       request<void>(`/sales/${id}`, { method: 'DELETE' }),
   },
   items: {
-    list: (saleId: number, status?: ItemStatus, category?: string) => {
+    list: (saleId: number, status?: ItemStatus, category?: string, page: number = 0, size: number = 20) => {
       const params = new URLSearchParams();
       if (status) params.set('status', status);
       if (category) params.set('category', category);
-      const qs = params.toString();
-      return request<Item[]>(`/sales/${saleId}/items${qs ? `?${qs}` : ''}`);
+      params.set('page', String(page));
+      params.set('size', String(size));
+      return request<PaginatedResponse<Item>>(`/sales/${saleId}/items?${params.toString()}`);
     },
     get: (saleId: number, itemId: number) =>
       request<Item>(`/sales/${saleId}/items/${itemId}`),
