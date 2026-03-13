@@ -7,9 +7,15 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/sales/{saleId}/items")
@@ -54,6 +60,28 @@ public class ItemController {
             @PathVariable Long saleId,
             @PathVariable Long itemId,
             @Valid @RequestBody Item item) {
+        return toResponse(itemService.updateItem(saleId, itemId, item));
+    }
+
+    @PostMapping("/{itemId}/photo")
+    public Map<String, Object> uploadPhoto(
+            @PathVariable Long saleId,
+            @PathVariable Long itemId,
+            @RequestParam("file") MultipartFile file) throws IOException {
+        Path uploadDir = Paths.get("uploads").toAbsolutePath();
+        Files.createDirectories(uploadDir);
+
+        String ext = "";
+        String original = file.getOriginalFilename();
+        if (original != null && original.contains(".")) {
+            ext = original.substring(original.lastIndexOf('.'));
+        }
+        String filename = UUID.randomUUID() + ext;
+        Files.copy(file.getInputStream(), uploadDir.resolve(filename));
+
+        String photoUrl = "/uploads/" + filename;
+        Item item = itemService.getItem(saleId, itemId);
+        item.setPhotoUrl(photoUrl);
         return toResponse(itemService.updateItem(saleId, itemId, item));
     }
 

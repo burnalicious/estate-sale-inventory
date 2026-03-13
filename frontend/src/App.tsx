@@ -3,13 +3,17 @@ import SalesListPage from './pages/SalesListPage';
 import SaleDetailPage from './pages/SaleDetailPage';
 import SaleFormPage from './pages/SaleFormPage';
 import ItemFormPage from './pages/ItemFormPage';
+import LoginBar from './components/LoginBar';
 import './App.css';
 
 function App() {
   return (
     <BrowserRouter>
       <header className="app-header">
-        <Link to="/">Estate Sale Inventory</Link>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Link to="/">Estate Sale Inventory</Link>
+          <LoginBar />
+        </div>
       </header>
       <main className="app-main">
         <Routes>

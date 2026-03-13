@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client';
-import type { Sale } from '../api/types';
+import type { Sale, SaleStatus } from '../api/types';
 
 function StatusBadge({ status }: { status: string }) {
   return (
@@ -9,13 +9,17 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
+const STATUS_FILTERS: (SaleStatus | undefined)[] = [undefined, 'UPCOMING', 'ACTIVE', 'COMPLETED'];
+const STATUS_LABELS: Record<string, string> = { '': 'All', UPCOMING: 'Upcoming', ACTIVE: 'Active', COMPLETED: 'Completed' };
+
 export default function SalesListPage() {
   const [sales, setSales] = useState<Sale[]>([]);
   const [error, setError] = useState('');
+  const [statusFilter, setStatusFilter] = useState<SaleStatus | undefined>(undefined);
 
   useEffect(() => {
-    api.sales.list().then(setSales).catch((e) => setError(e.message));
-  }, []);
+    api.sales.list(statusFilter).then(setSales).catch((e) => setError(e.message));
+  }, [statusFilter]);
 
   return (
     <div>
@@ -24,10 +28,22 @@ export default function SalesListPage() {
         <Link to="/sales/new" className="btn btn-primary">+ New Sale</Link>
       </div>
 
+      <div className="filter-bar">
+        {STATUS_FILTERS.map((s) => (
+          <button
+            key={s || 'all'}
+            className={`filter-btn ${statusFilter === s ? 'filter-btn-active' : ''}`}
+            onClick={() => setStatusFilter(s)}
+          >
+            {STATUS_LABELS[s || '']}
+          </button>
+        ))}
+      </div>
+
       {error && <div className="error">{error}</div>}
 
       {sales.length === 0 && !error && (
-        <p>No sales yet. Create your first one!</p>
+        <p>No sales found.</p>
       )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
-import type { Sale, Item } from '../api/types';
+import type { Sale, Item, ItemStatus } from '../api/types';
 
 function StatusBadge({ status }: { status: string }) {
   return (
@@ -13,6 +13,13 @@ function formatPrice(price: number) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(price);
 }
 
+function photoSrc(url: string) {
+  if (url.startsWith('/uploads/')) return `http://localhost:8080${url}`;
+  return url;
+}
+
+const ITEM_STATUSES: (ItemStatus | undefined)[] = [undefined, 'AVAILABLE', 'SOLD', 'WITHDRAWN'];
+
 export default function SaleDetailPage() {
   const { saleId } = useParams<{ saleId: string }>();
   const navigate = useNavigate();
@@ -22,6 +29,8 @@ export default function SaleDetailPage() {
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
+  const [statusFilter, setStatusFilter] = useState<ItemStatus | undefined>(undefined);
+  const [categoryFilter, setCategoryFilter] = useState('');
 
   const id = Number(saleId);
 
@@ -30,12 +39,12 @@ export default function SaleDetailPage() {
   }, [id]);
 
   useEffect(() => {
-    api.items.list(id, undefined, undefined, page).then((res) => {
+    api.items.list(id, statusFilter, categoryFilter || undefined, page).then((res) => {
       setItems(res.content);
       setTotalPages(res.totalPages);
       setTotalElements(res.totalElements);
     }).catch((e) => setError(e.message));
-  }, [id, page]);
+  }, [id, page, statusFilter, categoryFilter]);
 
   const handleDeleteSale = async () => {
     if (!confirm('Delete this sale and all its items?')) return;
@@ -51,7 +60,7 @@ export default function SaleDetailPage() {
     if (!confirm('Delete this item?')) return;
     try {
       await api.items.delete(id, itemId);
-      const res = await api.items.list(id, undefined, undefined, page);
+      const res = await api.items.list(id, statusFilter, categoryFilter || undefined, page);
       setItems(res.content);
       setTotalPages(res.totalPages);
       setTotalElements(res.totalElements);
@@ -59,6 +68,14 @@ export default function SaleDetailPage() {
       setError(e.message);
     }
   };
+
+  const clearFilters = () => {
+    setStatusFilter(undefined);
+    setCategoryFilter('');
+    setPage(0);
+  };
+
+  const hasFilters = statusFilter !== undefined || categoryFilter !== '';
 
   if (!sale && !error) return <p>Loading...</p>;
 
@@ -93,7 +110,28 @@ export default function SaleDetailPage() {
             <Link to={`/sales/${id}/items/new`} className="btn btn-primary">+ Add Item</Link>
           </div>
 
-          {items.length === 0 && <p>No items yet. Add your first one!</p>}
+          <div className="filter-bar">
+            {ITEM_STATUSES.map((s) => (
+              <button
+                key={s || 'all'}
+                className={`filter-btn ${statusFilter === s ? 'filter-btn-active' : ''}`}
+                onClick={() => { setStatusFilter(s); setPage(0); }}
+              >
+                {s ? s : 'All'}
+              </button>
+            ))}
+            <input
+              value={categoryFilter}
+              onChange={(e) => { setCategoryFilter(e.target.value); setPage(0); }}
+              placeholder="Filter by category..."
+              style={{ padding: '4px 10px', fontSize: '13px', border: '1px solid var(--border)', borderRadius: '4px', width: '180px' }}
+            />
+            {hasFilters && (
+              <button onClick={clearFilters} className="filter-btn" style={{ color: 'var(--danger)' }}>Clear</button>
+            )}
+          </div>
+
+          {items.length === 0 && <p>No items found.</p>}
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {items.map((item) => (
@@ -101,7 +139,7 @@ export default function SaleDetailPage() {
                 <div style={{ display: 'flex', gap: '16px' }}>
                   {item.photoUrl && (
                     <img
-                      src={item.photoUrl}
+                      src={photoSrc(item.photoUrl)}
                       alt={item.name}
                       style={{
                         width: '120px',
@@ -141,21 +179,9 @@ export default function SaleDetailPage() {
 
           {totalPages > 1 && (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px', marginTop: '16px' }}>
-              <button
-                className="btn btn-secondary"
-                disabled={page === 0}
-                onClick={() => setPage(page - 1)}
-              >
-                Previous
-              </button>
+              <button className="btn btn-secondary" disabled={page === 0} onClick={() => setPage(page - 1)}>Previous</button>
               <span>Page {page + 1} of {totalPages}</span>
-              <button
-                className="btn btn-secondary"
-                disabled={page >= totalPages - 1}
-                onClick={() => setPage(page + 1)}
-              >
-                Next
-              </button>
+              <button className="btn btn-secondary" disabled={page >= totalPages - 1} onClick={() => setPage(page + 1)}>Next</button>
             </div>
           )}
         </>

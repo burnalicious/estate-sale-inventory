@@ -2,9 +2,13 @@ import type { Sale, SaleCreate, Item, ItemCreate, SaleStatus, ItemStatus, Pagina
 
 const BASE = 'http://localhost:8080/api';
 
+let authHeader: string | null = null;
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (authHeader) headers['Authorization'] = authHeader;
   const res = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     ...options,
   });
   if (!res.ok) {
@@ -16,6 +20,20 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  auth: {
+    login: async (username: string, password: string) => {
+      authHeader = 'Basic ' + btoa(`${username}:${password}`);
+      try {
+        await request<Sale[]>('/sales');
+        return true;
+      } catch {
+        authHeader = null;
+        return false;
+      }
+    },
+    logout: () => { authHeader = null; },
+    isLoggedIn: () => authHeader !== null,
+  },
   sales: {
     list: (status?: SaleStatus) =>
       request<Sale[]>(`/sales${status ? `?status=${status}` : ''}`),
@@ -45,5 +63,19 @@ export const api = {
       request<Item>(`/sales/${saleId}/items/${itemId}`, { method: 'PUT', body: JSON.stringify(data) }),
     delete: (saleId: number, itemId: number) =>
       request<void>(`/sales/${saleId}/items/${itemId}`, { method: 'DELETE' }),
+    uploadPhoto: async (saleId: number, itemId: number, file: File) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch(`${BASE}/sales/${saleId}/items/${itemId}/photo`, {
+        method: 'POST',
+        headers: authHeader ? { 'Authorization': authHeader } : {},
+        body: formData,
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.message || `Upload failed: ${res.status}`);
+      }
+      return res.json() as Promise<Item>;
+    },
   },
 };

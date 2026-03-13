@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { api } from '../api/client';
 import type { ItemCreate, ItemStatus, ItemCondition } from '../api/types';
@@ -22,6 +22,7 @@ export default function ItemFormPage() {
   const [form, setForm] = useState<ItemCreate>(EMPTY);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isEdit) {
@@ -51,11 +52,18 @@ export default function ItemFormPage() {
     setSaving(true);
     setError('');
     try {
+      let item;
       if (isEdit) {
-        await api.items.update(sId, Number(itemId), form);
+        item = await api.items.update(sId, Number(itemId), form);
       } else {
-        await api.items.create(sId, form);
+        item = await api.items.create(sId, form);
       }
+
+      const file = fileRef.current?.files?.[0];
+      if (file) {
+        await api.items.uploadPhoto(sId, item.id, file);
+      }
+
       navigate(`/sales/${saleId}`);
     } catch (e: any) {
       setError(e.message);
@@ -117,6 +125,11 @@ export default function ItemFormPage() {
             <label>Photo URL</label>
             <input value={form.photoUrl || ''} onChange={set('photoUrl')} placeholder="https://..." />
           </div>
+        </div>
+
+        <div className="form-group">
+          <label>Upload Photo</label>
+          <input type="file" ref={fileRef} accept="image/*" />
         </div>
 
         <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
