@@ -1,0 +1,380 @@
+openapi: 3.0.3
+info:
+  title: Estate Sale Inventory API
+  description: API for managing estate sale inventory — sales, items, and photos.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/api
+    description: Local development
+
+tags:
+  - name: Sales
+    description: Estate sale events
+  - name: Items
+    description: Inventory items within a sale
+
+paths:
+  /sales:
+    get:
+      tags: [Sales]
+      summary: List all sales
+      operationId: listSales
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/SaleStatus'
+      responses:
+        '200':
+          description: List of sales
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Sale'
+    post:
+      tags: [Sales]
+      summary: Create a new sale
+      operationId: createSale
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaleCreate'
+      responses:
+        '201':
+          description: Sale created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sale'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /sales/{saleId}:
+    parameters:
+      - $ref: '#/components/parameters/SaleId'
+    get:
+      tags: [Sales]
+      summary: Get a sale by ID
+      operationId: getSale
+      responses:
+        '200':
+          description: Sale details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sale'
+        '404':
+          description: Sale not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      tags: [Sales]
+      summary: Update a sale
+      operationId: updateSale
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaleCreate'
+      responses:
+        '200':
+          description: Sale updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sale'
+        '404':
+          description: Sale not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags: [Sales]
+      summary: Delete a sale
+      operationId: deleteSale
+      responses:
+        '204':
+          description: Sale deleted
+        '404':
+          description: Sale not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /sales/{saleId}/items:
+    parameters:
+      - $ref: '#/components/parameters/SaleId'
+    get:
+      tags: [Items]
+      summary: List items for a sale
+      operationId: listItems
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/ItemStatus'
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Item'
+        '404':
+          description: Sale not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      tags: [Items]
+      summary: Add an item to a sale
+      operationId: createItem
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemCreate'
+      responses:
+        '201':
+          description: Item created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Sale not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /sales/{saleId}/items/{itemId}:
+    parameters:
+      - $ref: '#/components/parameters/SaleId'
+      - $ref: '#/components/parameters/ItemId'
+    get:
+      tags: [Items]
+      summary: Get an item by ID
+      operationId: getItem
+      responses:
+        '200':
+          description: Item details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        '404':
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      tags: [Items]
+      summary: Update an item
+      operationId: updateItem
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemCreate'
+      responses:
+        '200':
+          description: Item updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        '404':
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags: [Items]
+      summary: Delete an item
+      operationId: deleteItem
+      responses:
+        '204':
+          description: Item deleted
+        '404':
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  parameters:
+    SaleId:
+      name: saleId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+    ItemId:
+      name: itemId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+  schemas:
+    SaleStatus:
+      type: string
+      enum: [UPCOMING, ACTIVE, COMPLETED]
+
+    ItemStatus:
+      type: string
+      enum: [AVAILABLE, SOLD, WITHDRAWN]
+
+    ItemCondition:
+      type: string
+      enum: [NEW, LIKE_NEW, GOOD, FAIR, POOR]
+
+    SaleCreate:
+      type: object
+      required: [name, address1, city, state, zipCode, saleDate, status]
+      properties:
+        name:
+          type: string
+          maxLength: 255
+          example: "Johnson Family Estate Sale"
+        address1:
+          type: string
+          maxLength: 255
+          example: "123 Main Street"
+        address2:
+          type: string
+          maxLength: 255
+          example: "Unit B"
+        city:
+          type: string
+          maxLength: 100
+          example: "Austin"
+        state:
+          type: string
+          minLength: 2
+          maxLength: 2
+          example: "TX"
+        zipCode:
+          type: string
+          maxLength: 10
+          example: "78701"
+        saleDate:
+          type: string
+          format: date
+          example: "2026-04-15"
+        status:
+          $ref: '#/components/schemas/SaleStatus'
+
+    Sale:
+      allOf:
+        - $ref: '#/components/schemas/SaleCreate'
+        - type: object
+          properties:
+            id:
+              type: integer
+              format: int64
+            itemCount:
+              type: integer
+              description: Number of items in this sale
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+
+    ItemCreate:
+      type: object
+      required: [name, price, status]
+      properties:
+        name:
+          type: string
+          maxLength: 255
+          example: "Antique Oak Dresser"
+        description:
+          type: string
+          example: "Beautiful 1920s oak dresser with original brass hardware. Minor wear on top surface."
+        category:
+          type: string
+          maxLength: 100
+          example: "Furniture"
+        condition:
+          $ref: '#/components/schemas/ItemCondition'
+        price:
+          type: number
+          format: double
+          minimum: 0
+          example: 275.00
+        status:
+          $ref: '#/components/schemas/ItemStatus'
+        photoUrl:
+          type: string
+          maxLength: 500
+          example: "https://storage.example.com/items/dresser-001.jpg"
+
+    Item:
+      allOf:
+        - $ref: '#/components/schemas/ItemCreate'
+        - type: object
+          properties:
+            id:
+              type: integer
+              format: int64
+            saleId:
+              type: integer
+              format: int64
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+
+    Error:
+      type: object
+      properties:
+        status:
+          type: integer
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
