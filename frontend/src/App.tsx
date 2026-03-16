@@ -10,8 +10,8 @@ function App() {
   return (
     <BrowserRouter>
       <header className="app-header">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Link to="/">Estate Sale Inventory</Link>
+        <div className="app-header-inner">
+          <Link to="/" className="app-logo">Estate Sale Inventory</Link>
           <LoginBar />
         </div>
       </header>

@@ -46,25 +46,21 @@ export default function SalesListPage() {
         <p>No sales found.</p>
       )}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      <div className="sales-grid">
         {sales.map((sale) => (
-          <Link
-            key={sale.id}
-            to={`/sales/${sale.id}`}
-            className="card"
-            style={{ textDecoration: 'none', color: 'inherit' }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <div>
-                <h2 style={{ margin: '0 0 4px' }}>{sale.name}</h2>
-                <p style={{ margin: '0 0 4px', fontSize: '14px' }}>
-                  {sale.address1}{sale.address2 ? `, ${sale.address2}` : ''}, {sale.city}, {sale.state} {sale.zipCode}
-                </p>
-                <p style={{ margin: 0, fontSize: '14px' }}>
-                  Date: {sale.saleDate} &middot; {sale.itemCount} item{sale.itemCount !== 1 ? 's' : ''}
-                </p>
+          <Link key={sale.id} to={`/sales/${sale.id}`} className="card-link">
+            <div className="card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                <h2 style={{ margin: 0, fontSize: '18px' }}>{sale.name}</h2>
+                <StatusBadge status={sale.status} />
               </div>
-              <StatusBadge status={sale.status} />
+              <p style={{ margin: '0 0 4px', fontSize: '14px' }}>
+                {sale.address1}{sale.address2 ? `, ${sale.address2}` : ''}, {sale.city}, {sale.state} {sale.zipCode}
+              </p>
+              <p style={{ margin: 0, fontSize: '14px', display: 'flex', justifyContent: 'space-between' }}>
+                <span>Date: {sale.saleDate}</span>
+                <span style={{ fontWeight: 500 }}>{sale.itemCount} item{sale.itemCount !== 1 ? 's' : ''}</span>
+              </p>
             </div>
           </Link>
         ))}
