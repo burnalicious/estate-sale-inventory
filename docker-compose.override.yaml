@@ -1,0 +1,7 @@
+# Dev override: only runs postgres, backend and frontend run locally
+# This file is auto-loaded by `docker compose up -d`
+services:
+  backend:
+    profiles: ["prod"]
+  frontend:
+    profiles: ["prod"]
