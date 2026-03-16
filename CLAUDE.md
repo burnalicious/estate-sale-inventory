@@ -69,3 +69,25 @@ UI is at http://localhost:5173
 - **Pagination**: Items list returns `{content, totalElements, totalPages, page, size}` — default page size is 20
 - **Filtering**: Sales filterable by status; Items filterable by status and category via query params
 - **Photo upload**: `POST /api/sales/{saleId}/items/{itemId}/photo` accepts multipart file
+- **Sale summary**: `GET /api/sales/{saleId}/summary` returns item counts and pricing totals
+- **Item tags**: Items support a `tags` field (comma-separated in DB, array in API)
+
+## Testing
+
+The project uses **Playwright E2E tests** as the primary test suite. Tests live in `e2e/` at the project root.
+
+### Running tests
+```
+cd e2e
+npx playwright test
+```
+
+Prerequisites: Docker Postgres must be running (`docker compose up -d`). Playwright auto-starts the backend and frontend via `webServer` config, or reuses them if already running.
+
+### Test structure (`e2e/tests/`)
+- `auth.spec.ts` — Login/logout, auth enforcement
+- `sales-crud.spec.ts` — Sale create, read, update, delete, filtering
+- `items-crud.spec.ts` — Item CRUD, tags, conditions, statuses
+- `items-filtering.spec.ts` — Status/category filtering, pagination
+- `sale-summary.spec.ts` — Pricing summary accuracy
+- `helpers.ts` — Shared login, API setup helpers, form field locator
