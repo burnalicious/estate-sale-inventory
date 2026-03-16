@@ -133,22 +133,18 @@ export default function SaleDetailPage() {
 
           {items.length === 0 && <p>No items found.</p>}
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div className="items-list">
             {items.map((item) => (
               <div key={item.id} className="card">
                 <div style={{ display: 'flex', gap: '16px' }}>
-                  {item.photoUrl && (
+                  {item.photoUrl ? (
                     <img
                       src={photoSrc(item.photoUrl)}
                       alt={item.name}
-                      style={{
-                        width: '120px',
-                        height: '120px',
-                        objectFit: 'cover',
-                        borderRadius: '6px',
-                        flexShrink: 0,
-                      }}
+                      className="item-photo"
                     />
+                  ) : (
+                    <div className="item-photo-placeholder">No photo</div>
                   )}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
