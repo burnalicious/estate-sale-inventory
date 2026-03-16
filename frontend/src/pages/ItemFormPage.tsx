@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { api } from '../api/client';
 import type { ItemCreate, ItemStatus, ItemCondition } from '../api/types';
 
-const EMPTY: ItemCreate = {
+const EMPTY: ItemCreate & { tagsInput: string } = {
   name: '',
   description: '',
   category: '',
@@ -11,6 +11,8 @@ const EMPTY: ItemCreate = {
   price: 0,
   status: 'AVAILABLE',
   photoUrl: '',
+  tags: [],
+  tagsInput: '',
 };
 
 export default function ItemFormPage() {
@@ -19,7 +21,7 @@ export default function ItemFormPage() {
   const isEdit = !!itemId;
   const sId = Number(saleId);
 
-  const [form, setForm] = useState<ItemCreate>(EMPTY);
+  const [form, setForm] = useState<ItemCreate & { tagsInput: string }>(EMPTY);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -35,6 +37,8 @@ export default function ItemFormPage() {
           price: item.price,
           status: item.status,
           photoUrl: item.photoUrl || '',
+          tags: item.tags || [],
+          tagsInput: (item.tags || []).join(', '),
         });
       }).catch((e) => setError(e.message));
     }
@@ -52,11 +56,15 @@ export default function ItemFormPage() {
     setSaving(true);
     setError('');
     try {
+      const submitData: ItemCreate = {
+        ...form,
+        tags: form.tagsInput.split(',').map(t => t.trim()).filter(Boolean),
+      };
       let item;
       if (isEdit) {
-        item = await api.items.update(sId, Number(itemId), form);
+        item = await api.items.update(sId, Number(itemId), submitData);
       } else {
-        item = await api.items.create(sId, form);
+        item = await api.items.create(sId, submitData);
       }
 
       const file = fileRef.current?.files?.[0];
@@ -125,6 +133,11 @@ export default function ItemFormPage() {
             <label>Photo URL</label>
             <input value={form.photoUrl || ''} onChange={set('photoUrl')} placeholder="https://..." />
           </div>
+        </div>
+
+        <div className="form-group">
+          <label>Tags (comma-separated)</label>
+          <input value={form.tagsInput} onChange={(e) => setForm({ ...form, tagsInput: e.target.value })} placeholder="e.g. antique, wood, vintage" />
         </div>
 
         <div className="form-group">

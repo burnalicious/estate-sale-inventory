@@ -1,4 +1,4 @@
-import type { Sale, SaleCreate, Item, ItemCreate, SaleStatus, ItemStatus, PaginatedResponse } from './types';
+import type { Sale, SaleCreate, Item, ItemCreate, SaleStatus, ItemStatus, PaginatedResponse, SaleSummary } from './types';
 
 const BASE = 'http://localhost:8080/api';
 
@@ -45,6 +45,8 @@ export const api = {
       request<Sale>(`/sales/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
     delete: (id: number) =>
       request<void>(`/sales/${id}`, { method: 'DELETE' }),
+    summary: (id: number) =>
+      request<SaleSummary>(`/sales/${id}/summary`),
   },
   items: {
     list: (saleId: number, status?: ItemStatus, category?: string, page: number = 0, size: number = 20) => {
@@ -57,10 +59,14 @@ export const api = {
     },
     get: (saleId: number, itemId: number) =>
       request<Item>(`/sales/${saleId}/items/${itemId}`),
-    create: (saleId: number, data: ItemCreate) =>
-      request<Item>(`/sales/${saleId}/items`, { method: 'POST', body: JSON.stringify(data) }),
-    update: (saleId: number, itemId: number, data: ItemCreate) =>
-      request<Item>(`/sales/${saleId}/items/${itemId}`, { method: 'PUT', body: JSON.stringify(data) }),
+    create: (saleId: number, data: ItemCreate) => {
+      const body = { ...data, tags: data.tags?.join(',') || null };
+      return request<Item>(`/sales/${saleId}/items`, { method: 'POST', body: JSON.stringify(body) });
+    },
+    update: (saleId: number, itemId: number, data: ItemCreate) => {
+      const body = { ...data, tags: data.tags?.join(',') || null };
+      return request<Item>(`/sales/${saleId}/items/${itemId}`, { method: 'PUT', body: JSON.stringify(body) });
+    },
     delete: (saleId: number, itemId: number) =>
       request<void>(`/sales/${saleId}/items/${itemId}`, { method: 'DELETE' }),
     uploadPhoto: async (saleId: number, itemId: number, file: File) => {

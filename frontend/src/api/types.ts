@@ -38,8 +38,18 @@ export interface Item {
   price: number;
   status: ItemStatus;
   photoUrl: string | null;
+  tags: string[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface SaleSummary {
+  totalItems: number;
+  totalValue: number;
+  soldItems: number;
+  soldValue: number;
+  availableItems: number;
+  withdrawnItems: number;
 }
 
 export interface PaginatedResponse<T> {
@@ -58,4 +68,5 @@ export interface ItemCreate {
   price: number;
   status: ItemStatus;
   photoUrl?: string;
+  tags?: string[];
 }

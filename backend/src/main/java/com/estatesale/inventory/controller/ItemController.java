@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -102,6 +104,9 @@ public class ItemController {
         map.put("price", item.getPrice());
         map.put("status", item.getStatus());
         map.put("photoUrl", item.getPhotoUrl());
+        map.put("tags", item.getTags() != null && !item.getTags().isBlank()
+                ? Arrays.asList(item.getTags().split(","))
+                : Collections.emptyList());
         map.put("createdAt", item.getCreatedAt());
         map.put("updatedAt", item.getUpdatedAt());
         return map;
