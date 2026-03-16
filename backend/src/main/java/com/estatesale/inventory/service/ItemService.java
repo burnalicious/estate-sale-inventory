@@ -72,6 +72,7 @@ public class ItemService {
         item.setPrice(updated.getPrice());
         item.setStatus(updated.getStatus());
         item.setPhotoUrl(updated.getPhotoUrl());
+        item.setTags(updated.getTags());
         return itemRepository.save(item);
     }
 

@@ -43,6 +43,11 @@ public class SaleController {
         return toResponse(saleService.updateSale(saleId, sale));
     }
 
+    @GetMapping("/{saleId}/summary")
+    public Map<String, Object> getSaleSummary(@PathVariable Long saleId) {
+        return saleService.getSaleSummary(saleId);
+    }
+
     @DeleteMapping("/{saleId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteSale(@PathVariable Long saleId) {

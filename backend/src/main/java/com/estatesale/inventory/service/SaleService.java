@@ -1,13 +1,17 @@
 package com.estatesale.inventory.service;
 
 import com.estatesale.inventory.exception.ResourceNotFoundException;
+import com.estatesale.inventory.model.ItemStatus;
 import com.estatesale.inventory.model.Sale;
 import com.estatesale.inventory.model.SaleStatus;
 import com.estatesale.inventory.repository.ItemRepository;
 import com.estatesale.inventory.repository.SaleRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional
@@ -57,5 +61,17 @@ public class SaleService {
 
     public int getItemCount(Long saleId) {
         return itemRepository.countBySaleId(saleId);
+    }
+
+    public Map<String, Object> getSaleSummary(Long id) {
+        getSale(id); // verify sale exists
+        Map<String, Object> summary = new HashMap<>();
+        summary.put("totalItems", itemRepository.countBySaleId(id));
+        summary.put("totalValue", itemRepository.sumPriceBySaleId(id));
+        summary.put("soldItems", itemRepository.countBySaleIdAndStatus(id, ItemStatus.SOLD));
+        summary.put("soldValue", itemRepository.sumPriceBySaleIdAndStatus(id, ItemStatus.SOLD));
+        summary.put("availableItems", itemRepository.countBySaleIdAndStatus(id, ItemStatus.AVAILABLE));
+        summary.put("withdrawnItems", itemRepository.countBySaleIdAndStatus(id, ItemStatus.WITHDRAWN));
+        return summary;
     }
 }

@@ -116,6 +116,27 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /sales/{saleId}/summary:
+    parameters:
+      - $ref: '#/components/parameters/SaleId'
+    get:
+      tags: [Sales]
+      summary: Get sale pricing summary
+      operationId: getSaleSummary
+      responses:
+        '200':
+          description: Sale summary with pricing totals
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SaleSummary'
+        '404':
+          description: Sale not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /sales/{saleId}/items:
     parameters:
       - $ref: '#/components/parameters/SaleId'
@@ -349,6 +370,11 @@ components:
           type: string
           maxLength: 500
           example: "https://storage.example.com/items/dresser-001.jpg"
+        tags:
+          type: array
+          items:
+            type: string
+          example: ["antique", "wood"]
 
     Item:
       allOf:
@@ -367,6 +393,24 @@ components:
             updatedAt:
               type: string
               format: date-time
+
+    SaleSummary:
+      type: object
+      properties:
+        totalItems:
+          type: integer
+        totalValue:
+          type: number
+          format: double
+        soldItems:
+          type: integer
+        soldValue:
+          type: number
+          format: double
+        availableItems:
+          type: integer
+        withdrawnItems:
+          type: integer
 
     Error:
       type: object

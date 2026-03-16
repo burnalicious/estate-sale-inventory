@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
-import type { Sale, Item, ItemStatus } from '../api/types';
+import type { Sale, Item, ItemStatus, SaleSummary } from '../api/types';
 
 function StatusBadge({ status }: { status: string }) {
   return (
@@ -29,6 +29,7 @@ export default function SaleDetailPage() {
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
+  const [summary, setSummary] = useState<SaleSummary | null>(null);
   const [statusFilter, setStatusFilter] = useState<ItemStatus | undefined>(undefined);
   const [categoryFilter, setCategoryFilter] = useState('');
 
@@ -36,6 +37,7 @@ export default function SaleDetailPage() {
 
   useEffect(() => {
     api.sales.get(id).then(setSale).catch((e) => setError(e.message));
+    api.sales.summary(id).then(setSummary).catch(() => {});
   }, [id]);
 
   useEffect(() => {
@@ -105,6 +107,31 @@ export default function SaleDetailPage() {
             </div>
           </div>
 
+          {summary && (
+            <div className="summary-bar" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px', marginTop: '24px' }}>
+              <div className="card" style={{ textAlign: 'center', padding: '12px' }}>
+                <div style={{ fontSize: '24px', fontWeight: 600, color: 'var(--text-h)' }}>{summary.totalItems}</div>
+                <div style={{ fontSize: '12px', color: 'var(--text)' }}>Total Items</div>
+              </div>
+              <div className="card" style={{ textAlign: 'center', padding: '12px' }}>
+                <div style={{ fontSize: '24px', fontWeight: 600, color: 'var(--text-h)' }}>{formatPrice(summary.totalValue)}</div>
+                <div style={{ fontSize: '12px', color: 'var(--text)' }}>Total Value</div>
+              </div>
+              <div className="card" style={{ textAlign: 'center', padding: '12px' }}>
+                <div style={{ fontSize: '24px', fontWeight: 600, color: 'var(--success)' }}>{summary.soldItems}</div>
+                <div style={{ fontSize: '12px', color: 'var(--text)' }}>Sold ({formatPrice(summary.soldValue)})</div>
+              </div>
+              <div className="card" style={{ textAlign: 'center', padding: '12px' }}>
+                <div style={{ fontSize: '24px', fontWeight: 600, color: 'var(--accent)' }}>{summary.availableItems}</div>
+                <div style={{ fontSize: '12px', color: 'var(--text)' }}>Available</div>
+              </div>
+              <div className="card" style={{ textAlign: 'center', padding: '12px' }}>
+                <div style={{ fontSize: '24px', fontWeight: 600, color: 'var(--danger)' }}>{summary.withdrawnItems}</div>
+                <div style={{ fontSize: '12px', color: 'var(--text)' }}>Withdrawn</div>
+              </div>
+            </div>
+          )}
+
           <div className="page-header" style={{ marginTop: '32px' }}>
             <h2>Items ({totalElements})</h2>
             <Link to={`/sales/${id}/items/new`} className="btn btn-primary">+ Add Item</Link>
@@ -162,6 +189,13 @@ export default function SaleDetailPage() {
                       </div>
                       <StatusBadge status={item.status} />
                     </div>
+                    {item.tags && item.tags.length > 0 && (
+                      <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginTop: '6px' }}>
+                        {item.tags.map((tag) => (
+                          <span key={tag} style={{ background: 'var(--accent-light)', color: 'var(--accent)', padding: '1px 8px', borderRadius: '10px', fontSize: '11px', fontWeight: 500 }}>{tag}</span>
+                        ))}
+                      </div>
+                    )}
                     {item.description && (
                       <p style={{ margin: '8px 0 0', fontSize: '14px', lineHeight: '1.5' }}>
                         {item.description}

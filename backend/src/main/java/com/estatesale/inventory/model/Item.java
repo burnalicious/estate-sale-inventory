@@ -44,6 +44,9 @@ public class Item {
     @Column(name = "photo_url")
     private String photoUrl;
 
+    @Size(max = 500)
+    private String tags;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -87,6 +90,9 @@ public class Item {
 
     public String getPhotoUrl() { return photoUrl; }
     public void setPhotoUrl(String photoUrl) { this.photoUrl = photoUrl; }
+
+    public String getTags() { return tags; }
+    public void setTags(String tags) { this.tags = tags; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
