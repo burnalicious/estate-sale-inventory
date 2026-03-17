@@ -1,11 +1,15 @@
 import { test, expect } from '@playwright/test';
-import { createSaleViaAPI, createItemViaAPI } from './helpers';
+import { createSaleViaAPI, createItemViaAPI, deleteSaleViaAPI } from './helpers';
 
 test.describe('Items Filtering & Pagination', () => {
   let saleId: number;
 
   test.beforeEach(async ({ request }) => {
     saleId = await createSaleViaAPI(request);
+  });
+
+  test.afterEach(async ({ request }) => {
+    await deleteSaleViaAPI(request, saleId).catch(() => {});
   });
 
   test('filter items by status', async ({ page, request }) => {

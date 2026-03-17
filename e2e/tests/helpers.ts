@@ -1,4 +1,6 @@
-import { type Page, type Locator, type APIRequestContext } from '@playwright/test';
+import { type Page, type APIRequestContext } from '@playwright/test';
+
+const AUTH_HEADER = 'Basic ' + btoa('admin:admin');
 
 export async function login(page: Page) {
   await page.getByRole('button', { name: 'Login' }).click();
@@ -12,7 +14,7 @@ export async function createSaleViaAPI(request: APIRequestContext, name?: string
   const response = await request.post('http://localhost:8080/api/sales', {
     headers: {
       'Content-Type': 'application/json',
-      Authorization: 'Basic ' + btoa('admin:admin'),
+      Authorization: AUTH_HEADER,
     },
     data: {
       name: name || `Test Sale ${Date.now()}`,
@@ -36,7 +38,7 @@ export async function createItemViaAPI(
   const response = await request.post(`http://localhost:8080/api/sales/${saleId}/items`, {
     headers: {
       'Content-Type': 'application/json',
-      Authorization: 'Basic ' + btoa('admin:admin'),
+      Authorization: AUTH_HEADER,
     },
     data: {
       name: `Item ${Date.now()}`,
@@ -49,12 +51,13 @@ export async function createItemViaAPI(
   return body.id as number;
 }
 
+export async function deleteSaleViaAPI(request: APIRequestContext, saleId: number) {
+  await request.delete(`http://localhost:8080/api/sales/${saleId}`, {
+    headers: { Authorization: AUTH_HEADER },
+  });
+}
+
 /** Must be called BEFORE clicking the delete button */
 export function acceptNextDialog(page: Page) {
   page.once('dialog', (d) => d.accept());
-}
-
-/** Find an input/select/textarea by its label text (labels aren't linked with for=) */
-export function field(page: Page, labelText: string): Locator {
-  return page.locator('.form-group').filter({ hasText: labelText }).locator('input, select, textarea').first();
 }

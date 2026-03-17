@@ -34,7 +34,7 @@ export default function LoginBar() {
     return (
       <div className="login-bar">
         <span>Logged in as <strong>{username}</strong></span>
-        <button onClick={handleLogout} className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: '12px' }}>Logout</button>
+        <button onClick={handleLogout} className="btn btn-secondary">Logout</button>
       </div>
     );
   }
@@ -46,27 +46,25 @@ export default function LoginBar() {
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           placeholder="Username"
-          style={{ padding: '4px 8px', fontSize: '13px', width: '120px', border: '1px solid var(--border)', borderRadius: '4px' }}
         />
         <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
-          style={{ padding: '4px 8px', fontSize: '13px', width: '120px', border: '1px solid var(--border)', borderRadius: '4px' }}
         />
-        <button type="submit" className="btn btn-primary" style={{ padding: '4px 10px', fontSize: '12px' }} disabled={loading}>
+        <button type="submit" className="btn btn-primary" disabled={loading}>
           {loading ? '...' : 'Login'}
         </button>
-        <button type="button" onClick={() => setShowForm(false)} className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: '12px' }}>Cancel</button>
-        {error && <span style={{ color: 'var(--danger)', fontSize: '12px' }}>{error}</span>}
+        <button type="button" onClick={() => setShowForm(false)} className="btn btn-secondary">Cancel</button>
+        {error && <span className="login-error">{error}</span>}
       </form>
     );
   }
 
   return (
     <div className="login-bar">
-      <button onClick={() => setShowForm(true)} className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: '12px' }}>Login</button>
+      <button onClick={() => setShowForm(true)} className="btn btn-secondary">Login</button>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { login, field, createSaleViaAPI, createItemViaAPI, acceptNextDialog } from './helpers';
+import { login, createSaleViaAPI, createItemViaAPI, acceptNextDialog, deleteSaleViaAPI } from './helpers';
 
 test.describe('Items CRUD', () => {
   let saleId: number;
@@ -8,21 +8,25 @@ test.describe('Items CRUD', () => {
     saleId = await createSaleViaAPI(request);
   });
 
+  test.afterEach(async ({ request }) => {
+    await deleteSaleViaAPI(request, saleId).catch(() => {});
+  });
+
   test('add an item with all fields', async ({ page }) => {
     await page.goto(`/sales/${saleId}`);
     await login(page);
 
     await page.getByRole('link', { name: '+ Add Item' }).click();
-    await field(page, 'Item Name').fill('Antique Oak Dresser');
-    await field(page, 'Description').fill('Beautiful 1920s oak dresser');
-    await field(page, 'Price').fill('275');
-    await field(page, 'Category').fill('Furniture');
-    await field(page, 'Condition').selectOption('GOOD');
-    await field(page, 'Status').selectOption('AVAILABLE');
+    await page.getByLabel('Item Name').fill('Antique Oak Dresser');
+    await page.getByLabel('Description').fill('Beautiful 1920s oak dresser');
+    await page.getByLabel('Price').fill('275');
+    await page.getByLabel('Category').fill('Furniture');
+    await page.getByLabel('Condition').selectOption('GOOD');
+    await page.getByLabel('Status').selectOption('AVAILABLE');
     await page.getByRole('button', { name: 'Add Item' }).click();
 
     // Should navigate back to sale detail and show the item
-    const itemCard = page.locator('.items-list .card').filter({ hasText: 'Antique Oak Dresser' });
+    const itemCard = page.getByTestId('item-card').filter({ hasText: 'Antique Oak Dresser' });
     await expect(itemCard).toBeVisible();
     await expect(itemCard).toContainText('$275.00');
     await expect(itemCard).toContainText('Furniture');
@@ -33,11 +37,11 @@ test.describe('Items CRUD', () => {
     await login(page);
 
     await page.getByRole('link', { name: '+ Add Item' }).click();
-    await field(page, 'Item Name').fill('Mystery Box');
-    await field(page, 'Price').fill('5');
+    await page.getByLabel('Item Name').fill('Mystery Box');
+    await page.getByLabel('Price').fill('5');
     await page.getByRole('button', { name: 'Add Item' }).click();
 
-    const itemCard = page.locator('.items-list .card').filter({ hasText: 'Mystery Box' });
+    const itemCard = page.getByTestId('item-card').filter({ hasText: 'Mystery Box' });
     await expect(itemCard).toBeVisible();
     await expect(itemCard).toContainText('$5.00');
   });
@@ -48,13 +52,13 @@ test.describe('Items CRUD', () => {
     await login(page);
 
     // Click the Edit link inside the item card (not the sale Edit button)
-    await page.locator('.items-list .card').first().getByRole('link', { name: 'Edit' }).click();
-    await field(page, 'Item Name').fill('Updated Name');
-    await field(page, 'Price').fill('99');
-    await field(page, 'Status').selectOption('SOLD');
+    await page.getByTestId('item-card').first().getByRole('link', { name: 'Edit' }).click();
+    await page.getByLabel('Item Name').fill('Updated Name');
+    await page.getByLabel('Price').fill('99');
+    await page.getByLabel('Status').selectOption('SOLD');
     await page.getByRole('button', { name: 'Update Item' }).click();
 
-    const itemCard = page.locator('.items-list .card').filter({ hasText: 'Updated Name' });
+    const itemCard = page.getByTestId('item-card').filter({ hasText: 'Updated Name' });
     await expect(itemCard).toBeVisible();
     await expect(itemCard).toContainText('$99.00');
     await expect(itemCard).toContainText('SOLD');
@@ -78,9 +82,9 @@ test.describe('Items CRUD', () => {
     await login(page);
 
     await page.getByRole('link', { name: '+ Add Item' }).click();
-    await field(page, 'Item Name').fill('Tagged Vase');
-    await field(page, 'Price').fill('40');
-    await field(page, 'Tags').fill('antique, ceramic, blue');
+    await page.getByLabel('Item Name').fill('Tagged Vase');
+    await page.getByLabel('Price').fill('40');
+    await page.getByLabel('Tags').fill('antique, ceramic, blue');
     await page.getByRole('button', { name: 'Add Item' }).click();
 
     await expect(page.getByText('Tagged Vase')).toBeVisible();
@@ -96,9 +100,9 @@ test.describe('Items CRUD', () => {
 
     for (const cond of conditions) {
       await page.getByRole('link', { name: '+ Add Item' }).click();
-      await field(page, 'Item Name').fill(`${cond} Item`);
-      await field(page, 'Price').fill('10');
-      await field(page, 'Condition').selectOption(cond);
+      await page.getByLabel('Item Name').fill(`${cond} Item`);
+      await page.getByLabel('Price').fill('10');
+      await page.getByLabel('Condition').selectOption(cond);
       await page.getByRole('button', { name: 'Add Item' }).click();
       await expect(page.getByText(`${cond} Item`)).toBeVisible();
     }
@@ -111,9 +115,9 @@ test.describe('Items CRUD', () => {
 
     for (const st of statuses) {
       await page.getByRole('link', { name: '+ Add Item' }).click();
-      await field(page, 'Item Name').fill(`${st} Item`);
-      await field(page, 'Price').fill('10');
-      await field(page, 'Status').selectOption(st);
+      await page.getByLabel('Item Name').fill(`${st} Item`);
+      await page.getByLabel('Price').fill('10');
+      await page.getByLabel('Status').selectOption(st);
       await page.getByRole('button', { name: 'Add Item' }).click();
       await expect(page.getByText(`${st} Item`)).toBeVisible();
     }

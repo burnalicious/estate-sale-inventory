@@ -50,16 +50,16 @@ export default function SalesListPage() {
         {sales.map((sale) => (
           <Link key={sale.id} to={`/sales/${sale.id}`} className="card-link">
             <div className="card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                <h2 style={{ margin: 0, fontSize: '18px' }}>{sale.name}</h2>
+              <div className="sale-card-header">
+                <h2 className="sale-card-title">{sale.name}</h2>
                 <StatusBadge status={sale.status} />
               </div>
-              <p style={{ margin: '0 0 4px', fontSize: '14px' }}>
+              <p className="sale-card-address">
                 {sale.address1}{sale.address2 ? `, ${sale.address2}` : ''}, {sale.city}, {sale.state} {sale.zipCode}
               </p>
-              <p style={{ margin: 0, fontSize: '14px', display: 'flex', justifyContent: 'space-between' }}>
+              <p className="sale-card-footer">
                 <span>Date: {sale.saleDate}</span>
-                <span style={{ fontWeight: 500 }}>{sale.itemCount} item{sale.itemCount !== 1 ? 's' : ''}</span>
+                <span className="sale-card-count">{sale.itemCount} item{sale.itemCount !== 1 ? 's' : ''}</span>
               </p>
             </div>
           </Link>
