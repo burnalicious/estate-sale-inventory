@@ -81,7 +81,7 @@ export default function ItemFormPage() {
 
   return (
     <div>
-      <div style={{ marginBottom: '8px' }}>
+      <div className="back-link">
         <Link to={`/sales/${saleId}`}>&larr; Back to Sale</Link>
       </div>
 
@@ -89,29 +89,29 @@ export default function ItemFormPage() {
 
       {error && <div className="error">{error}</div>}
 
-      <form onSubmit={handleSubmit} className="card" style={{ maxWidth: '600px' }}>
+      <form onSubmit={handleSubmit} className="card form-card" data-testid="item-form">
         <div className="form-group">
-          <label>Item Name *</label>
-          <input value={form.name} onChange={set('name')} required />
+          <label htmlFor="item-name">Item Name *</label>
+          <input id="item-name" value={form.name} onChange={set('name')} required />
         </div>
 
         <div className="form-group">
-          <label>Description</label>
-          <textarea value={form.description || ''} onChange={set('description')} />
+          <label htmlFor="item-description">Description</label>
+          <textarea id="item-description" value={form.description || ''} onChange={set('description')} />
         </div>
 
         <div className="form-row-3">
           <div className="form-group">
-            <label>Price *</label>
-            <input type="number" step="0.01" min="0" value={form.price} onChange={set('price')} required />
+            <label htmlFor="item-price">Price *</label>
+            <input id="item-price" type="number" step="0.01" min="0" value={form.price} onChange={set('price')} required />
           </div>
           <div className="form-group">
-            <label>Category</label>
-            <input value={form.category || ''} onChange={set('category')} placeholder="e.g. Furniture" />
+            <label htmlFor="item-category">Category</label>
+            <input id="item-category" value={form.category || ''} onChange={set('category')} placeholder="e.g. Furniture" />
           </div>
           <div className="form-group">
-            <label>Condition</label>
-            <select value={form.condition || ''} onChange={set('condition') as any}>
+            <label htmlFor="item-condition">Condition</label>
+            <select id="item-condition" value={form.condition || ''} onChange={set('condition') as any}>
               <option value="">-- Select --</option>
               {(['NEW', 'LIKE_NEW', 'GOOD', 'FAIR', 'POOR'] as ItemCondition[]).map((c) => (
                 <option key={c} value={c}>{c.replace('_', ' ')}</option>
@@ -122,30 +122,30 @@ export default function ItemFormPage() {
 
         <div className="form-row">
           <div className="form-group">
-            <label>Status *</label>
-            <select value={form.status} onChange={set('status') as any}>
+            <label htmlFor="item-status">Status *</label>
+            <select id="item-status" value={form.status} onChange={set('status') as any}>
               {(['AVAILABLE', 'SOLD', 'WITHDRAWN'] as ItemStatus[]).map((s) => (
                 <option key={s} value={s}>{s}</option>
               ))}
             </select>
           </div>
           <div className="form-group">
-            <label>Photo URL</label>
-            <input value={form.photoUrl || ''} onChange={set('photoUrl')} placeholder="https://..." />
+            <label htmlFor="item-photourl">Photo URL</label>
+            <input id="item-photourl" value={form.photoUrl || ''} onChange={set('photoUrl')} placeholder="https://..." />
           </div>
         </div>
 
         <div className="form-group">
-          <label>Tags (comma-separated)</label>
-          <input value={form.tagsInput} onChange={(e) => setForm({ ...form, tagsInput: e.target.value })} placeholder="e.g. antique, wood, vintage" />
+          <label htmlFor="item-tags">Tags (comma-separated)</label>
+          <input id="item-tags" value={form.tagsInput} onChange={(e) => setForm({ ...form, tagsInput: e.target.value })} placeholder="e.g. antique, wood, vintage" />
         </div>
 
         <div className="form-group">
-          <label>Upload Photo</label>
-          <input type="file" ref={fileRef} accept="image/*" />
+          <label htmlFor="item-photo">Upload Photo</label>
+          <input id="item-photo" type="file" ref={fileRef} accept="image/*" />
         </div>
 
-        <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+        <div className="form-actions">
           <button type="submit" className="btn btn-primary" disabled={saving}>
             {saving ? 'Saving...' : isEdit ? 'Update Item' : 'Add Item'}
           </button>

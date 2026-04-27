@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { createSaleViaAPI, createItemViaAPI } from './helpers';
+import { createSaleViaAPI, createItemViaAPI, deleteSaleViaAPI } from './helpers';
 
 test.describe('Sale Summary', () => {
   test('summary shows correct counts and values', async ({ page, request }) => {
@@ -12,11 +12,12 @@ test.describe('Sale Summary', () => {
 
     await page.goto(`/sales/${saleId}`);
 
-    // Use the summary cards — each has a label div with specific text
-    const summaryCards = page.locator('.summary-bar .card');
-    await expect(summaryCards.filter({ hasText: 'Total Items' })).toContainText('4');
-    await expect(summaryCards.filter({ hasText: 'Total Value' })).toContainText('$425.00');
-    await expect(summaryCards.filter({ hasText: 'Available' })).toContainText('2');
-    await expect(summaryCards.filter({ hasText: 'Withdrawn' })).toContainText('1');
+    await expect(page.getByTestId('summary-total-items')).toContainText('4');
+    await expect(page.getByTestId('summary-total-value')).toContainText('$425.00');
+    await expect(page.getByTestId('summary-available')).toContainText('2');
+    await expect(page.getByTestId('summary-withdrawn')).toContainText('1');
+
+    // Cleanup
+    await deleteSaleViaAPI(request, saleId);
   });
 });

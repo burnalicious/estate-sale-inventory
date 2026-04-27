@@ -64,7 +64,7 @@ export default function SaleFormPage() {
 
   return (
     <div>
-      <div style={{ marginBottom: '8px' }}>
+      <div className="back-link">
         <Link to={isEdit ? `/sales/${saleId}` : '/'}>&larr; Back</Link>
       </div>
 
@@ -72,45 +72,45 @@ export default function SaleFormPage() {
 
       {error && <div className="error">{error}</div>}
 
-      <form onSubmit={handleSubmit} className="card" style={{ maxWidth: '600px' }}>
+      <form onSubmit={handleSubmit} className="card form-card" data-testid="sale-form">
         <div className="form-group">
-          <label>Sale Name *</label>
-          <input value={form.name} onChange={set('name')} required />
+          <label htmlFor="sale-name">Sale Name *</label>
+          <input id="sale-name" value={form.name} onChange={set('name')} required />
         </div>
 
         <div className="form-group">
-          <label>Address Line 1 *</label>
-          <input value={form.address1} onChange={set('address1')} required />
+          <label htmlFor="sale-address1">Address Line 1 *</label>
+          <input id="sale-address1" value={form.address1} onChange={set('address1')} required />
         </div>
 
         <div className="form-group">
-          <label>Address Line 2</label>
-          <input value={form.address2 || ''} onChange={set('address2')} />
+          <label htmlFor="sale-address2">Address Line 2</label>
+          <input id="sale-address2" value={form.address2 || ''} onChange={set('address2')} />
         </div>
 
         <div className="form-row-3">
           <div className="form-group">
-            <label>City *</label>
-            <input value={form.city} onChange={set('city')} required />
+            <label htmlFor="sale-city">City *</label>
+            <input id="sale-city" value={form.city} onChange={set('city')} required />
           </div>
           <div className="form-group">
-            <label>State *</label>
-            <input value={form.state} onChange={set('state')} required maxLength={2} placeholder="TX" />
+            <label htmlFor="sale-state">State *</label>
+            <input id="sale-state" value={form.state} onChange={set('state')} required maxLength={2} placeholder="TX" />
           </div>
           <div className="form-group">
-            <label>Zip Code *</label>
-            <input value={form.zipCode} onChange={set('zipCode')} required maxLength={10} />
+            <label htmlFor="sale-zip">Zip Code *</label>
+            <input id="sale-zip" value={form.zipCode} onChange={set('zipCode')} required maxLength={10} />
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label>Sale Date *</label>
-            <input type="date" value={form.saleDate} onChange={set('saleDate')} required />
+            <label htmlFor="sale-date">Sale Date *</label>
+            <input id="sale-date" type="date" value={form.saleDate} onChange={set('saleDate')} required />
           </div>
           <div className="form-group">
-            <label>Status *</label>
-            <select value={form.status} onChange={set('status') as any}>
+            <label htmlFor="sale-status">Status *</label>
+            <select id="sale-status" value={form.status} onChange={set('status') as any}>
               {(['UPCOMING', 'ACTIVE', 'COMPLETED'] as SaleStatus[]).map((s) => (
                 <option key={s} value={s}>{s}</option>
               ))}
@@ -118,7 +118,7 @@ export default function SaleFormPage() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+        <div className="form-actions">
           <button type="submit" className="btn btn-primary" disabled={saving}>
             {saving ? 'Saving...' : isEdit ? 'Update Sale' : 'Create Sale'}
           </button>
